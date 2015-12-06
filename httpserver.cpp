@@ -14,30 +14,50 @@ HttpServer::~HttpServer()
 
 void HttpServer::run()
 {
+    FILE *f = fopen("index.html", "w");
+    fprintf(f, "<html><head><title>YEL's SERVER</title></head>"
+    "<body><h1>Welcome to Yel's Server</h1><br/>"
+    "<p>Did you know that you can pass parameters and those will"
+    " be displayed here in table form? </p>"
+    "<p>try it pass something like </p>"
+    "<p id=\"sample\"></p>"
+    "<script>"
+    "document.getElementById('sample').innerHTML = window.location + '?param1=value1&amp;param2=value2'"
+    "</script>"
+    "</body></html>");
+    fclose(f);
     struct addrinfo hints, *res, *p;
     struct sockaddr_in clientaddr;
     socklen_t addrlen;
+    struct sockaddr_in serv_addr;
+    this->listener = socket(AF_INET, SOCK_STREAM, 0);
+    bzero((char *) &serv_addr, sizeof(serv_addr));
+    serv_addr.sin_family = AF_INET;
+    serv_addr.sin_port = htons(atoi(this->port));
+    serv_addr.sin_addr.s_addr = INADDR_ANY;
+    if (bind(this->listener, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0)
+        fprintf(stderr, "ERROR on binding\n");
     // getaddrinfo for host
-    memset (&hints, 0, sizeof(hints));
-    hints.ai_family = AF_INET;
-    hints.ai_socktype = SOCK_STREAM;
-    if(getaddrinfo(NULL, this->port, &hints, &res) != 0) {
-        perror ("getaddrinfo() error");
-        exit(1);
-    }
-    // create socket and bind
-    for(p = res; p!=NULL; p=p->ai_next) {
-        this->listener = socket(p->ai_family, p->ai_socktype, 0);
-        if(this->listener == -1) 
-            continue;
-        if(bind(this->listener, p->ai_addr, p->ai_addrlen) == 0)
-            break;
-    }
-    if(p == NULL) {
-        perror ("socket() or bind()");
-        exit(1);
-    }
-    freeaddrinfo(res);
+    // memset (&hints, 0, sizeof(hints));
+    // hints.ai_family = AF_INET;
+    // hints.ai_socktype = SOCK_STREAM;
+    // if(getaddrinfo(NULL, this->port, &hints, &res) != 0) {
+    //     perror ("getaddrinfo() error");
+    //     exit(1);
+    // }
+    // // create socket and bind
+    // for(p = res; p!=NULL; p=p->ai_next) {
+    //     this->listener = socket(p->ai_family, p->ai_socktype, 0);
+    //     if(this->listener == -1) 
+    //         continue;
+    //     if(bind(this->listener, p->ai_addr, p->ai_addrlen) == 0)
+    //         break;
+    // }
+    // if(p == NULL) {
+    //     perror ("socket() or bind()");
+    //     exit(1);
+    // }
+    // freeaddrinfo(res);
     // listen for incoming connections
     if(listen (this->listener, SOMAXCONN) != 0) {
         perror("listen() error");
