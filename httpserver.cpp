@@ -83,9 +83,28 @@ void HttpServer::respond(int id)
                 write(this->clients[id], "HTTP/1.0 400 Bad Request\n", 25);
             else {
                 if(strncmp(request[1], "/", 2) == 0)
-                    request[1] = "/index.html"; // append index.html if requesting for root
+                    strcpy(request[1], "/index.html"); // append index.html if requesting for root
+
                 strcpy(path, this->base);
-                strcpy(&path[strlen(this->base)], request[1]);
+                if(strchr(request[1], '?') != NULL) {
+                    int counter = 0;
+                    char *end_params;
+                    char *params = strtok_r(request[1], "?", &end_params);
+                    FILE *index = fopen("index.html", "w");
+                    strcpy(&path[strlen(this->base)], params);
+                    fprintf(index, "<html><head><title>YEL's SERVER</title></head>"
+                            "<body><h1>Welcome to Yel's Server</h1><table>");
+                    char *key, *value, *end_token;
+                    while(params = strtok_r(NULL, "?&", &end_params)) {
+                        key = strtok_r(params, "=", &end_token);
+                        value = strtok_r(NULL, "", &end_token);
+                        printf("key = %s and value = %s\n", key, value);
+                    }
+                    fprintf(index, "</table></body></html>");
+                    fclose(index);
+                } else {
+                    strcpy(&path[strlen(this->base)], request[1]);
+                }
                 printf("\x1b[32mFILE\x1b[0m: \x1b[35m%s\n\n\x1b[0m", path);
                 if((fd = open(path, O_RDONLY)) != -1) { // File found 
                     send(clients[id], "HTTP/1.1 200 OK\n\n", 17, 0);
