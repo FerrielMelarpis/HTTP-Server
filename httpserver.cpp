@@ -75,15 +75,13 @@ void HttpServer::respond(int id)
     else  { // message received
         printf("\x1b[33m%s\n\x1b[0m", msg);
         request[0] = strtok(msg, " \t\n");
-        if(strncmp(request[0], "GET\0", 4) == 0) {
+        if(strncmp(request[0], "GET\0", 4) == 0 || strncmp(request[0], "POST\0", 5) == 0) {
             request[1] = strtok(NULL, " \t");
             request[2] = strtok(NULL, " \t\n");
             if(strncmp(request[2], "HTTP/1.0", 8) != 0 
                 && strncmp(request[2], "HTTP/1.1", 8) != 0)
                 write(this->clients[id], "HTTP/1.0 400 Bad Request\n", 25);
             else {
-                // append index.html if requesting for root
-
                 strcpy(path, this->base);
                 if(strchr(request[1], '?') != NULL) {
                     int counter = 1;
