@@ -1,1 +1,1 @@
-alert("Welcome to this test site!");
+alert("You tried passing parameters to my test server :)");

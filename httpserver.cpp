@@ -82,27 +82,42 @@ void HttpServer::respond(int id)
                 && strncmp(request[2], "HTTP/1.1", 8) != 0)
                 write(this->clients[id], "HTTP/1.0 400 Bad Request\n", 25);
             else {
-                if(strncmp(request[1], "/", 2) == 0)
-                    strcpy(request[1], "/index.html"); // append index.html if requesting for root
+                // append index.html if requesting for root
 
                 strcpy(path, this->base);
                 if(strchr(request[1], '?') != NULL) {
-                    int counter = 0;
+                    int counter = 1;
                     char *end_params;
                     char *params = strtok_r(request[1], "?", &end_params);
                     FILE *index = fopen("index.html", "w");
-                    strcpy(&path[strlen(this->base)], params);
-                    fprintf(index, "<html><head><title>YEL's SERVER</title></head>"
-                            "<body><h1>Welcome to Yel's Server</h1><table>");
+                    if(strncmp(params, "/", 2) == 0)
+                        strcpy(&path[strlen(this->base)], "/index.html");
+                    else 
+                        strcpy(&path[strlen(this->base)], params);
+                    
+                    fprintf(index, "<html><head>"
+                            "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">"
+                            "<link href=\"./pure-release-0.6.0/pure.css\" type=\"text/css\" rel=\"stylesheet\">"
+                            "<title>YEL's SERVER</title></head>"
+                            "<body><h1>Welcome to Yel's Server</h1><table class=\"pure-table pure-table-horizontal\">");
+                    fprintf(index, "<thead><tr>"
+                            "<th>Parameter #</th><th>Key</th><th>Value</th>"
+                            "</tr></thead><tbody>");
                     char *key, *value, *end_token;
                     while(params = strtok_r(NULL, "?&", &end_params)) {
+                        fprintf(index, "<tr>");
                         key = strtok_r(params, "=", &end_token);
                         value = strtok_r(NULL, "", &end_token);
-                        printf("key = %s and value = %s\n", key, value);
+                        fprintf(index, "<td>%d</td><td>%s</td><td>%s</td></tr>", counter, key, value);
+                        counter++;
                     }
-                    fprintf(index, "</table></body></html>");
+                    fprintf(index, "</tbody></table>"
+                            "<script src=\"test.js\"></script>"
+                            "</body></html>");
                     fclose(index);
                 } else {
+                    if(strncmp(request[1], "/", 2) == 0)
+                        strcpy(request[1], "/index.html"); 
                     strcpy(&path[strlen(this->base)], request[1]);
                 }
                 printf("\x1b[32mFILE\x1b[0m: \x1b[35m%s\n\n\x1b[0m", path);
