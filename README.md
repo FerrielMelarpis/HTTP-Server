@@ -1,5 +1,5 @@
 # HTTP-Server
-A simple HTTP Server implemented in C
+A simple HTTP Server implemented in C++
 
 # HOW TO BUILD:
 It is simple. Just run the Makefile.
